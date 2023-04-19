@@ -7,14 +7,31 @@ class Tile(pygame.sprite.Sprite):
         self.image.fill('red')
         self.rect = self.image.get_rect(topleft = pos)
 
+    #def update(self, y_shift):
+       # self.rect.y += y_shift
         
-class PowerUps(pygame.sprite.Sprite):
+class JumpPowerUp(pygame.sprite.Sprite):
     def __init__(self, pos, size):
         super().__init__()
         self.image = pygame.Surface((size,size))
         self.image.fill('blue')
         
         self.rect = self.image.get_rect(topleft = pos)
+
+class GhostPowerUp(pygame.sprite.Sprite):
+    def __init__(self, pos, size):
+        super().__init__()
+        self.image = pygame.Surface((size, size))
+        self.image.fill('white')
+        self.rect = self.image.get_rect(topleft = pos)
+
+class LifePowerUp(pygame.sprite.Sprite):
+    def __init__(self, pos, size):
+        super().__init__()
+        self.image = pygame.Surface((size, size))
+        self.image.fill('green')
+        self.rect = self.image.get_rect(topleft = pos)
+        
 
 
 class Level():
@@ -39,10 +56,20 @@ class Level():
                 if col == 'S':
                     player_sprite = Player((x,y),View.tile_size)
                     self.player.add(player_sprite)
-                if col == 'P':
+                if col == 'J':
                     x = col_index * View.tile_size +21
                     y = row_index * View.tile_size +21
-                    powerup = PowerUps((x,y),20)
+                    powerup = JumpPowerUp((x,y),20)
+                    self.powerups.add(powerup)
+                if col == 'G':
+                    x = col_index * View.tile_size +21
+                    y = row_index * View.tile_size +21
+                    powerup = GhostPowerUp((x,y),20)
+                    self.powerups.add(powerup)
+                if col == 'L':
+                    x = col_index * View.tile_size +21
+                    y = row_index * View.tile_size +21
+                    powerup = LifePowerUp((x,y),20)
                     self.powerups.add(powerup)
         
     def side_collision(self):
@@ -51,6 +78,11 @@ class Level():
         #List of the tiles in the sprite tiles
         #tiles = self.tiles.sprites
         
+        #collidedObjects = pygame.sprite.groupcollide(self.player,self.tiles,False,False)
+        #if(len(collidedObjects) == 1):
+            #print("Collided")
+            #tile = collidedObjects.items()
+            #print(tile)
 
         player = self.player.sprite
         player.rect.x += player.direction.x * player.horizontalSpeed
@@ -58,6 +90,7 @@ class Level():
         for sprite in self.tiles.sprites():
             
             if sprite.rect.colliderect(player.rect):
+                #print(sprite.rect.colliderect(player.rect))
                 if player.direction.x < 0:
                     player.rect.left = sprite.rect.right
                     player.direction.x = 0
@@ -77,25 +110,39 @@ class Level():
             
             if sprite.rect.colliderect(player.rect):
                 
+                #print(sprite.rect.colliderect(player.rect))
                 if player.direction.y > 0:
                     player.rect.bottom = sprite.rect.top
                     player.direction.y = 0
+                    
                     player.jumping = False
+                    
                     
                 elif player.direction.y < 0:
                     player.rect.top = sprite.rect.bottom
-                    player.direction.y = 0
+                    player.direction.y = 0    
                     
     
-    def jumpPowerUp_collision(self):
+    def powerUp_collision(self):
         #you are welcome
         dict = pygame.sprite.groupcollide(self.player, self.powerups, False, True)
         if dict: 
-            list_dict = list(dict.keys())
-            list_dict[0].image.fill((0, 0, 200))
-            list_dict[0].jump_speed = list_dict[0].jump_speed * 1.4
-            
-        
+            #the keys of the dictionary is just a group containing the player character sprite. 
+            player = list(dict.keys())
+            #the values are a group that contains all the sprites that the first group collides with
+            powerup = list(dict.values())
+
+            #this determines what type of powerup was touched, and applies the appropriate changes. 
+            if isinstance(powerup[0][0], JumpPowerUp):
+                player[0].image.fill((0, 0, 200))
+                player[0].jump_speed = player[0].jump_speed * 1.4
+            if isinstance(powerup[0][0], GhostPowerUp):
+                player[0].image.fill((255, 255, 255))
+                player[0].jump_speed = player[0].jump_speed * 1.4
+            if isinstance(powerup[0][0], LifePowerUp):
+                player[0].image.fill((0, 255, 0))
+                player[0].lives = player[0].lives + 1
+                print(player[0].lives)
 
     def run(self):
         # the tiles being added
@@ -103,8 +150,8 @@ class Level():
         self.tiles.draw(self.surface)
         self.powerups.draw(self.surface)
         
-
-        self.jumpPowerUp_collision()
+        self.powerUp_collision()
+        
         self.player.update()
         self.top_collision()
         self.side_collision()
@@ -123,11 +170,13 @@ class Player(pygame.sprite.Sprite, Level):
         #self.image.load('squidknight.png')
         self.rect = self.image.get_rect(topleft = pos)
         
+        self.lives = 3
         self.direction = pygame.math.Vector2(0,0)
         self.horizontalSpeed = 2
         self.gravity = 0.5
         self.jump_speed = -12
         self.jumping = False
+        self.num = 0
         
 
     def physics(self):
@@ -136,9 +185,12 @@ class Player(pygame.sprite.Sprite, Level):
 
 
     def input(self):
+        
+        
+        '''
         keys = pygame.key.get_pressed()
+        
         if keys[pygame.K_d]:
-            
             self.direction.x = 1
         elif keys[pygame.K_a]:
             
@@ -146,17 +198,27 @@ class Player(pygame.sprite.Sprite, Level):
         else:
             self.direction.x = 0
         if keys[pygame.K_SPACE]:
-            #print(self.jumping)
+            scroll_thresh = 50
+            #if self.rect.top > 1280 - scroll_thresh:
+            
+            #Will check to see if the character is currently jumping with the variable: jumping.
             if (not self.jumping):
+                #Set jumping to True
+
                 self.jumping = True
                 self.jump()
-                
+        '''
+        
+        
+
             
-            
+    def move(self,key):
+        pass
 
     def jump(self):
         
         self.direction.y = self.jump_speed
+        
         #print(self.top_collision())
             
 
@@ -171,20 +233,30 @@ class Player(pygame.sprite.Sprite, Level):
 class View:
     #Variables related to the screen's dimensions and attributues.
     level_map = [
-
-    '        XX        XXXX   ',
-    '              P          ',
-    '      S      XXXX        ',
-    ' P   XXX              XXX',
-    ' X        X              ',
-    ' XX  P   P           X   ',
-    '     X   X    XXX    XX  ',
-    '     X         X     XXX ',
-    '  XXXX XXXX    XXX   XXX ',
-    'XXXXXX XXXXX  XXXXXX XXX ']
+    '                      XXX', 
+    '        XX        XXXX   ', 
+    '             XXXX        ', 
+    ' J   XXX              XXX', 
+    ' X        X              ', 
+    ' XX  G   G           X   ', 
+    '     X   X    XXX    XX  ', 
+    '   L X  S L    X     XXX ', 
+    '  XXXX XXXX X  XXX   XXX ',
+    '                         ',
+    '                         ', 
+    '                         ', 
+    '                         ', 
+    '     XXX                 ', 
+    ' J                       ', 
+    ' X        X              ', 
+    ' XX                  X   ',
+    '     X   X    XXX    X   ',
+    '          X   X     XX   ', 
+    'XXXXXXXX  XXXXXXXX       '] 
+    
     tile_size = 64
-    screen_w = 1280
-    screen_h = len(level_map) * tile_size
+    screen_w = 1600
+    screen_h = 640
     #screen_w = len(level_map) * tile_size
     #screen_h = 10 * tile_size
     screen = pygame.display.set_mode((screen_w,screen_h))
