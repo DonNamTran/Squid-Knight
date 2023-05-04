@@ -13,19 +13,12 @@ class gameLoop:
         model = Model()
         view = View(model)
         model.setViewObject(view) 
-        model.initializeObjects()
         events = EventController(model, view)
-        level1 = Level(view.level_map,view.screen)  
-     
-        #game loopplayadas 
+        level = Level(view.level_map,view.screen)  
+        
         while True:
             #calls the method in view that updates the screen.
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()    
-                    sys.exit()
-            
-            view.updateScreen(level1)
+            view.updateScreen(level)
             
 
 
