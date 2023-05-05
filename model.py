@@ -331,9 +331,9 @@ class Player(pygame.sprite.Sprite, Level):
             self.direction.y = self.jump_speed*1.5
         else:
             self.direction.y = self.jump_speed*1.75
-        sound = pygame.mixer.Sound("Sounds/jump.mp3")
-        pygame.mixer.Sound.set_volume(sound, 0.05)
-        pygame.mixer.Sound.play(sound)
+        #sound = pygame.mixer.Sound("Sounds/jump.mp3")
+        #pygame.mixer.Sound.set_volume(sound, 0.05)
+        #pygame.mixer.Sound.play(sound)
     def update(self):
         self.rect.x += self.direction.x * self.horizontalSpeed
         eventController.EventController.input(self)
